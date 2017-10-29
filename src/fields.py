@@ -133,6 +133,29 @@ class RestFloatField(InitialFixMixin, forms.FloatField):
     pass
 
 
+class PositiveIntegerField(RestIntegerField):
+    def __init__(self, *args, **kwargs):
+        """
+        Initializes field
+        :param args: Positional arguments
+        :param with_zero: If true, than integer can be equal to zero, else - not.
+        :param kwargs: Named arguments
+        """
+        with_zero = kwargs.pop('with_zero', False)
+        kwargs['min_value'] = kwargs.get('min_value', 0 if with_zero else 1)
+        super(PositiveIntegerField, self).__init__(*args, **kwargs)
+
+
+class IdField(PositiveIntegerField):
+    """
+    This field validates id (integer >= 1)
+    """
+
+    def __init__(self, *args, **kwargs):
+        kwargs['with_zero'] = kwargs.get('with_zero', False)
+        super(IdField, self).__init__(*args, **kwargs)
+
+
 class TimestampField(RestFloatField):
     """
     Form field, containing timestamp integer. Converts given value to datetime.datetime object
@@ -427,30 +450,7 @@ class ArrayField(JsonField):
             raise ValidationError("Invalid JSON value [{0}]".format(str(value)))
 
 
-class PositiveIntegerField(RestIntegerField):
-    def __init__(self, *args, **kwargs):
-        """
-        Initializes field
-        :param args: Positional arguments
-        :param with_zero: If true, than integer can be equal to zero, else - not.
-        :param kwargs: Named arguments
-        """
-        with_zero = kwargs.pop('with_zero', False)
-        kwargs['min_value'] = kwargs.get('min_value', 0 if with_zero else 1)
-        super(PositiveIntegerField, self).__init__(*args, **kwargs)
-
-
-class IdField(PositiveIntegerField):
-    """
-    This field validates id (integer >= 1)
-    """
-
-    def __init__(self, *args, **kwargs):
-        kwargs['with_zero'] = kwargs.get('with_zero', False)
-        super(IdField, self).__init__(*args, **kwargs)
-
-
-class UrlField(RegexField):
+class UrlField(RestCharField):
     """
     Field validates url string
     """
