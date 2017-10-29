@@ -32,14 +32,14 @@ class MyForm(forms.Form):
 
 ## Fields and their options
 
-#### RestCharField(*args, **kwargs)
+### RestCharField(*args, **kwargs)
 Wraps django.forms.forms.CharField:
 * Changes default value - None, not empty string
 * Fixes initial value (CharField returns empty string, ignoring 'initial' parameter and None value)  
 
 Resulting value: `Optional[str]`
 
-#### RegExField(*args, regex: Optional[str] = None, flags: int = 0, **kwargs)
+### RegExField(*args, regex: Optional[str] = None, flags: int = 0, **kwargs)
 RestCharField child class, that automatically validates given string with regex (re.match function)    
 Parameters:
 * regex: str - regular expression string
@@ -47,7 +47,7 @@ Parameters:
 
 Resulting value: `Optional[str]`
 
-#### RestChoiceField(*args, choices: Optional[Iterable[Union[str, Tuple[str]]]] = None, **kwargs)
+### RestChoiceField(*args, choices: Optional[Iterable[Union[str, Tuple[str]]]] = None, **kwargs)
 Wraps django.forms.forms.ChoiceField:
 * Changes default value - None, not empty string
 * Fixes initial value (ChoiceField returns empty string, ignoring 'initial' parameter and None value)
@@ -55,21 +55,21 @@ Wraps django.forms.forms.ChoiceField:
 
 Resulting value: `Optional[str]`
 
-#### RestIntegerField(*args, **kwargs)
-#### RestFloatField(*args, **kwargs)
+### RestIntegerField(*args, **kwargs)
+### RestFloatField(*args, **kwargs)
 Wrap django.forms.forms.IntegerField and django.forms.forms.FloatField, fixing initial value (Base fields returns None, ignoring 'initial' parameter and None value)  
 
 Resulting value: `Optional[int/float]`
 
-#### PositiveIntegerField(*args, with_zero: bool = False, **kwargs)
-#### IdField(*args, with_zero: bool = False, **kwargs)
+### PositiveIntegerField(*args, with_zero: bool = False, **kwargs)
+### IdField(*args, with_zero: bool = False, **kwargs)
 Child of RestIntegerField, validating value as positive integer
 Parameters:
 * with_zero: bool - if False, 0 will cause validation error  
 
 Resulting value: `Optional[int]`
 
-#### TimestampField(*args, in_future: bool = True, **kwargs)
+### TimestampField(*args, in_future: bool = True, **kwargs)
 Child of RestFloatField. Gets timestamp value and converts it into `datetime.datetime` object in UTC.
 Parameter `initial` can be float or `datetime.datetime` value.  
 Parameters:
@@ -77,14 +77,14 @@ Parameters:
 
 Resulting value: `Optional[datetime.datetime]`
 
-#### DateTimeField(*args, mask: str = "%Y-%m-%dT%H:%M:%S", **kwargs)
+### DateTimeField(*args, mask: str = "%Y-%m-%dT%H:%M:%S", **kwargs)
 Child of RestCharField. Parses datetime string to `datetime.datetime` value.
 Parameters:
 * mask: str - template for [datetime.strptime](https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior) function  
 
 Resulting value: `Optional[datetime.datetime]`
 
-#### MonthField(*args, mask: str = "%Y-%m", **kwargs)
+### MonthField(*args, mask: str = "%Y-%m", **kwargs)
 Child of DateTimeField. Parses month string to `datetime.date` value.
 Returns date of the first day of the month.
 Parameters:
@@ -92,17 +92,17 @@ Parameters:
 
 Resulting value: `Optional[datetime.date]`
 
-#### TimezoneField(*args, **kwargs)
+### TimezoneField(*args, **kwargs)
 Child of RestCharField. Validates string as one of pytz timezone names.
 
 Resulting value: `Optional[str]`
 
-#### DateUnitField(*args, **kwargs)
+### DateUnitField(*args, **kwargs)
 Child of RestChoiceField, validating value as one of [hour, day, week]  
 
 Resulting value: `Optional[str]`
 
-#### RestBooleanField(*args, **kwargs)
+### RestBooleanField(*args, **kwargs)
 Standard `django.forms.forms.BooleanField` is based on /django/forms/widgets.py `CheckboxInput.value_from_datadict(value)`
 It works improperly for REST model: `required=True` + `value=False` => `ValidationError`
 This filed fixes this issue, giving opportunity to send False (required or not):
@@ -112,7 +112,7 @@ This filed fixes this issue, giving opportunity to send False (required or not):
 
 Resulting value: `Optional[str]`
 
-#### LowerCaseEmailField(*args, **kwargs)
+### LowerCaseEmailField(*args, **kwargs)
 Wraps `django.forms.forms.EmailField`:
 * Converts email string to lowercase
 * Fixes initial value bug (EmailField returns empty string, ignoring 'initial' parameter)
@@ -120,20 +120,20 @@ Wraps `django.forms.forms.EmailField`:
 
 Resulting value: `Optional[str]`
 
-#### ColorField(*args, **kwargs)
+### ColorField(*args, **kwargs)
 Child of RestCharField, validating color.
 Color should be six hexadecimal characters.  
 
 Resulting value: `Optional[str]`
 
-#### TruncatedCharField(*args, truncate_length: int = 255, **kwargs)
+### TruncatedCharField(*args, truncate_length: int = 255, **kwargs)
 Child of RestCharField, which truncates given value, leaving first truncate_length characters.
 Parameters:
 * truncate_length: Optional[int] - If None, acts as RestCharField. If integer - number of characters to leave.  
 
 Resulting value: `Optional[str]`
 
-#### JsonField(*args, json_schema: Optional[dict], **kwargs)
+### JsonField(*args, json_schema: Optional[dict], **kwargs)
 Child of RestCharField. Validates, that value is dict, list or JSON-encoded string.
 If string - decodes it.
 Parameters:
@@ -141,7 +141,7 @@ Parameters:
 
 Resulting value: `Optional[Any]`
 
-#### ArrayField(*args, min_items: int = 0, max_items: Optional[int] = None, item_schema: Optional[dict] = None, **kwargs)
+### ArrayField(*args, min_items: int = 0, max_items: Optional[int] = None, item_schema: Optional[dict] = None, **kwargs)
 JsonField child. Validates array. It can be represented in 3 forms:
 * list instance
 * JSON-encoded array
@@ -154,22 +154,22 @@ Parameters:
 
 Resulting value: `Optional[List[Any]]`
 
-#### UrlField(*args, **kwargs)
+### UrlField(*args, **kwargs)
 RestCharField child. Validates string as URL with `django.core.validators.URLValidator`
 
 Resulting value: `Optional[str]`
 
-#### HexField(*args, **kwargs)
+### HexField(*args, **kwargs)
 RestCharField child. Validates that string has hexadecimal characters only.
 
 Resulting value: `Optional[str]`
 
-#### UUIDField(*args, **kwargs)
+### UUIDField(*args, **kwargs)
 RegexField child. Validates field to be correct UUID.
 
 Resulting value: `Optional[str]`
 
-#### FileField(*args, max_size: Optional[int] = None, valid_extensions: Optional[List[str]] = None, **kwargs)
+### FileField(*args, max_size: Optional[int] = None, valid_extensions: Optional[List[str]] = None, **kwargs)
 Wraps django.forms.forms.FileField:
 * Fixes initial value bug (FileField returns empty string, ignoring 'initial' parameter)
 * Adds validation parameters
