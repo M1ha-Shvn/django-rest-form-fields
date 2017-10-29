@@ -6,7 +6,6 @@ import datetime
 import json
 import os
 import re
-from typing import Any, Optional, Union
 
 import jsonschema
 import pytz
@@ -15,9 +14,10 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.utils.timezone import make_aware, utc
+from typing import Any, Optional, Union
 
-from src.exceptions import FileSizeError, FileTypeError
-from .compatibility import to_timestamp
+from django_rest_form_fields.compatibility import to_timestamp
+from django_rest_form_fields.exceptions import FileSizeError, FileTypeError
 
 
 class InitialFixMixin(forms.Field):

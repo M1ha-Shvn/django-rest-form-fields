@@ -14,8 +14,9 @@ import six
 from django.core.exceptions import ValidationError
 from django.utils.timezone import make_aware, utc
 
-from src.compatibility import to_timestamp
-from src.fields import RestBooleanField, LowerCaseEmailField, TimestampField, DateUnitField, ColorField, \
+from django_rest_form_fields.compatibility import to_timestamp
+from django_rest_form_fields.fields import RestBooleanField, LowerCaseEmailField, TimestampField, DateUnitField, \
+    ColorField, \
     TruncatedCharField, JsonField, ArrayField, UrlField, RestCharField, RestChoiceField, RestIntegerField, RegexField, \
     UUIDField, DateTimeField, MonthField, FileField, RestFloatField
 
