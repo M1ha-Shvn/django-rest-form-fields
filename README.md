@@ -40,9 +40,11 @@ Wraps django.forms.forms.CharField:
 Resulting value: `Optional[str]`
 
 ### RegExField(*args, regex: Optional[str] = None, flags: int = 0, **kwargs)
-RestCharField child class, that automatically validates given string with regex (re.match function)    
+RestCharField child class, that automatically validates given string with regex (re.match function)   
+If regex parameter is specified and value matches expression, you can get MatchObject using field `match` attribute
+
 Parameters:
-* regex: str - regular expression string
+* regex: str - regular expression string or compiled with `re.compile()` object
 * flags: int - optional validate flags  
 
 Resulting value: `Optional[str]`
