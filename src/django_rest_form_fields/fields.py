@@ -79,25 +79,27 @@ class RestCharField(EmptyStringFixMixing, forms.CharField):
 
 class RegexField(RestCharField):
     """
-    Wraps CharField to validate it via regular expression
+    Реализует валидацию CharField по регулярному выражению
     """
-
-    def __init__(self, *args, **kwargs):
-        regex = kwargs.pop('regex', None)
-        flags = kwargs.pop('flags', 0)
-
-        assert regex is None or isinstance(regex, six.string_types), 'regex must be string if given'
+    def __init__(self, *args, regex=None, flags=0, **kwargs):
+        assert regex is None or isinstance(regex, (six.string_types, re._pattern_type)),\
+            'regex must be string if given'
         assert isinstance(flags, int), 'flags must be integer'
-
         super(RegexField, self).__init__(*args, **kwargs)
-
         self.regex = regex
         self.flags = flags
+        self._match = None
 
-    def validate(self, value):  # type: (Optional[str]) -> None
+    def validate(self, value):
         super(RegexField, self).validate(value)
-        if value is not None and self.regex and not re.match(self.regex, str(value), self.flags):
-            raise ValidationError('Value don\'t match regexp "{0}"'.format(self.regex))
+        if value is not None and self.regex:
+            self._match = re.match(self.regex, str(value), self.flags)
+            if not self._match:
+                raise ValidationError('Value don\'t match regexp "{0}"'.format(self.regex))
+
+    @property
+    def match(self):
+        return self._match
 
 
 class RestChoiceField(EmptyStringFixMixing, forms.ChoiceField):

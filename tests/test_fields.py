@@ -198,10 +198,12 @@ class RestCharFieldTest(TestCase):
         self.assertEqual(test_data, f.clean(None))
 
 
-class RegexFieldTest(TestCase):
+class RegexFieldValidator(TestCase):
+    SRE_MATCH_TYPE = type(re.match("", ""))
+
     def test_required(self):
         f = RegexField(required=False, regex=r'.*')
-        self.assertEqual(None, f.clean(None))
+        self.assertIsNone(f.clean(None))
 
         f = RegexField(regex=r'.*')
         with self.assertRaises(ValidationError):
@@ -215,6 +217,11 @@ class RegexFieldTest(TestCase):
     def test_regex_valid(self):
         test_data = "test_string"
         f = RegexField(regex=r'^test.*$')
+        self.assertEqual(test_data, f.clean(test_data))
+
+    def test_regex_compiled(self):
+        test_data = "test_string"
+        f = RegexField(regex=re.compile('^test.*$'))
         self.assertEqual(test_data, f.clean(test_data))
 
     def test_regex_invalid(self):
@@ -242,6 +249,24 @@ class RegexFieldTest(TestCase):
         f = RegexField(regex=r'^test.*$', flags=re.I)
         self.assertEqual("test_string", f.clean("test_string"))
         self.assertEqual("tESt_string", f.clean("tESt_string"))
+
+    def test_match(self):
+        test_data = "test_string"
+        f = RegexField(regex=r'^test(.*)$')
+        f.clean(test_data)
+        self.assertTrue(isinstance(f.match, self.SRE_MATCH_TYPE))
+        self.assertEqual(f.match.group(0), test_data)
+        self.assertEqual(f.match.group(1), "_string")
+
+        f = RegexField(regex=r'^test(.*)$', required=False)
+        f.clean(None)
+        self.assertIsNone(f.match)
+
+    def test_no_regex(self):
+        # Acts as a simple CharField
+        test_data = "test_string"
+        f = RegexField()
+        self.assertEqual(test_data, f.clean(test_data))
 
 
 class RestChoiceFieldTest(TestCase):
