@@ -79,7 +79,7 @@ class RestCharField(EmptyStringFixMixing, forms.CharField):
 
 class RegexField(RestCharField):
     """
-    Реализует валидацию CharField по регулярному выражению
+    Wraps CharField to validate via regular expression
     """
     def __init__(self, *args, regex=None, flags=0, **kwargs):
         assert regex is None or isinstance(regex, (six.string_types, re._pattern_type)),\
@@ -90,7 +90,7 @@ class RegexField(RestCharField):
         self.flags = flags
         self._match = None
 
-    def validate(self, value):
+    def validate(self, value):  # type: (Optional[str]) -> None
         super(RegexField, self).validate(value)
         if value is not None and self.regex:
             self._match = re.match(self.regex, str(value), self.flags)
