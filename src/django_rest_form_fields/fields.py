@@ -81,13 +81,15 @@ class RegexField(RestCharField):
     """
     Wraps CharField to validate via regular expression
     """
-    def __init__(self, *args, regex=None, flags=0, **kwargs):
-        assert regex is None or isinstance(regex, (six.string_types, re._pattern_type)),\
+    def __init__(self, *args, **kwargs):
+        self.regex = kwargs.pop('regex', None)
+        self.flags = kwargs.pop('flags', 0)
+
+        assert self.regex is None or isinstance(self.regex, (six.string_types, re._pattern_type)),\
             'regex must be string if given'
-        assert isinstance(flags, int), 'flags must be integer'
+        assert isinstance(self.flags, int), 'flags must be integer'
+
         super(RegexField, self).__init__(*args, **kwargs)
-        self.regex = regex
-        self.flags = flags
         self._match = None
 
     def validate(self, value):  # type: (Optional[str]) -> None
