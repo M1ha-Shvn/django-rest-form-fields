@@ -16,9 +16,8 @@ from django.utils.timezone import make_aware, utc
 
 from django_rest_form_fields.compatibility import to_timestamp
 from django_rest_form_fields.fields import RestBooleanField, LowerCaseEmailField, TimestampField, DateUnitField, \
-    ColorField, \
-    TruncatedCharField, JsonField, ArrayField, UrlField, RestCharField, RestChoiceField, RestIntegerField, RegexField, \
-    UUIDField, DateTimeField, MonthField, FileField, RestFloatField
+    ColorField, IdArrayField, IdSetField, TruncatedCharField, JsonField, ArrayField, UrlField, RestCharField, \
+    RestChoiceField, RestIntegerField, RegexField, UUIDField, DateTimeField, MonthField, FileField, RestFloatField
 
 
 class LowerCaseEmailFieldTest(TestCase):
@@ -585,6 +584,54 @@ class ArrayFieldTest(TestCase):
     def test_initial(self):
         test_data = [1, 2, 3]
         f = ArrayField(required=False, initial=test_data)
+        self.assertEqual(test_data, f.clean(None))
+
+
+class IdArrayFieldTest(TestCase):
+    def test_result(self):
+        f = IdArrayField()
+        self.assertListEqual([1, 2, 3, 4, 3, 1], f.clean('[1, 2, 3, 4, 3, 1]'))
+        self.assertListEqual([1, 2, 3, 4, 3, 1], f.clean('["1", "2", "3", "4", "3", "1"]'))
+
+        # Id can't be 0
+        with self.assertRaises(ValidationError):
+            f.clean('[0, 1, 3, 4]')
+
+    def test_required(self):
+        f = IdArrayField(required=False)
+        self.assertIsNone(f.clean(None))
+
+        f = IdArrayField()
+        with self.assertRaises(ValidationError):
+            f.clean(None)
+
+    def test_initial(self):
+        test_data = [1, 2, 3]
+        f = IdArrayField(required=False, initial=test_data)
+        self.assertListEqual(test_data, f.clean(None))
+
+
+class IdSetFieldTest(TestCase):
+    def test_result(self):
+        f = IdSetField()
+        self.assertSetEqual({1, 2, 3, 4}, f.clean('[1, 2, 3, 4, 3, 1]'))
+        self.assertSetEqual({1, 2, 3, 4}, f.clean('["1", "2", "3", "4", "3", "1"]'))
+
+        # Id can't be 0
+        with self.assertRaises(ValidationError):
+            f.clean('[0, 1, 3, 4]')
+
+    def test_required(self):
+        f = IdSetField(required=False)
+        self.assertIsNone(f.clean(None))
+
+        f = IdSetField()
+        with self.assertRaises(ValidationError):
+            f.clean(None)
+
+    def test_initial(self):
+        test_data = {1, 2, 3}
+        f = IdSetField(required=False, initial=test_data)
         self.assertEqual(test_data, f.clean(None))
 
 

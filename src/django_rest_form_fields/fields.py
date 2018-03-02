@@ -454,6 +454,34 @@ class ArrayField(JsonField):
             raise ValidationError("Invalid JSON value [{0}]".format(str(value)))
 
 
+class IdArrayField(ArrayField):
+    """
+    Field, that parses array of ids from string. Each element is cleaned by IdField()
+    """
+
+    def clean(self, value):
+        if isinstance(value, set):
+            value = list(value)
+        res = super(IdArrayField, self).clean(value)
+        if isinstance(res, list):
+            id_field = IdField()
+            res = [id_field.clean(item) for item in res]
+        return res
+
+
+class IdSetField(IdArrayField):
+    """
+    Field, that parses set of ids from string. Duplicated ids are removed.
+    Each element is cleaned by IdField()
+    """
+
+    def clean(self, value):
+        res = super(IdSetField, self).clean(value)
+        if isinstance(res, list):
+            res = set(res)
+        return res
+
+
 class UrlField(RestCharField):
     """
     Field validates url string
