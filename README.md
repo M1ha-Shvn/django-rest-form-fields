@@ -156,6 +156,18 @@ Parameters:
 
 Resulting value: `Optional[List[Any]]`
 
+### IdArrayField(*args, **kwargs)
+ArrayField child. Validates array of IdField().  
+Each array element is cleaned with IdField().  
+
+Resulting value: `Optional[List[int]]`
+
+### IdSetField(*args, **kwargs)
+IdArrayField child. Validates set of IdField().  
+Each element is cleaned with IdField(). Removes duplicated ids from input, if needed.  
+
+Resulting value: `Optional[Set[int]]`
+
 ### UrlField(*args, **kwargs)
 RestCharField child. Validates string as URL with `django.core.validators.URLValidator`
 
