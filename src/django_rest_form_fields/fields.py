@@ -482,7 +482,7 @@ class IdSetField(IdArrayField):
         return res
 
 
-class UrlField(RestCharField):
+class UrlField(RegexField):
     """
     Field validates url string
     """
