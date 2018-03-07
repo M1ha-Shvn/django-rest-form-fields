@@ -659,6 +659,11 @@ class UrlFieldTest(TestCase):
         f = UrlField(required=False, initial='http://test.ru')
         self.assertEqual('http://test.ru', f.clean(None))
 
+    def test_regex(self):
+        test_data = 'http://test.ru/test.jpg'
+        f = UrlField(regex=r'^.*\.(jpg|jpeg|png|gif)*$', flags=re.I)
+        self.assertEqual(test_data, f.clean(test_data))
+
 
 class UUIDFieldTest(TestCase):
     def test_uuid_valid(self):

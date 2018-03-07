@@ -169,7 +169,7 @@ Each element is cleaned with IdField(). Removes duplicated ids from input, if ne
 Resulting value: `Optional[Set[int]]`
 
 ### UrlField(*args, **kwargs)
-RestCharField child. Validates string as URL with `django.core.validators.URLValidator`
+RegexField child. Validates string as URL with `django.core.validators.URLValidator`
 
 Resulting value: `Optional[str]`
 
