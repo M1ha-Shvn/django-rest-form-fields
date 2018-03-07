@@ -664,6 +664,10 @@ class UrlFieldTest(TestCase):
         f = UrlField(regex=r'^.*\.(jpg|jpeg|png|gif)*$', flags=re.I)
         self.assertEqual(test_data, f.clean(test_data))
 
+        f = UrlField(regex=r'^.*\.txt$', flags=re.I)
+        with self.assertRaises(ValidationError):
+            f.clean(test_data)
+
 
 class UUIDFieldTest(TestCase):
     def test_uuid_valid(self):
