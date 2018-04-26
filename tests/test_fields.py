@@ -7,6 +7,8 @@ import json
 import random
 import re
 import uuid
+
+from django.utils import timezone
 from io import BytesIO
 from unittest import TestCase
 
@@ -306,8 +308,9 @@ class RestChoiceFieldTest(TestCase):
 
 class TimestampFieldTest(TestCase):
     def test_now(self):
-        now = make_aware(datetime.datetime.now().replace(microsecond=0), utc)
+        now = timezone.now().replace(microsecond=0)
         now_ts = to_timestamp(now)
+        print(now_ts, now.timestamp(), now, datetime.datetime.fromtimestamp(now_ts), now.tzinfo)
         f = TimestampField()
         res = f.clean(now_ts)
         self.assertEqual(now, res)
@@ -339,12 +342,12 @@ class TimestampFieldTest(TestCase):
 
     def test_in_future(self):
         f = TimestampField()
-        future = make_aware(datetime.datetime.now().replace(microsecond=0), utc) + datetime.timedelta(hours=1)
+        future = timezone.now() + datetime.timedelta(hours=1)
         with self.assertRaises(ValidationError):
             f.clean(future)
 
     def test_initial(self):
-        now = make_aware(datetime.datetime.utcnow().replace(microsecond=0), utc)
+        now = timezone.now().replace(microsecond=0)
         f = TimestampField(initial=now, required=False)
         res = f.clean(None)
         self.assertEqual(now, res)
@@ -363,13 +366,13 @@ class TimestampFieldTest(TestCase):
 
 class DateTimeFieldTest(TestCase):
     def test_now(self):
-        now = make_aware(datetime.datetime.now().replace(microsecond=0), utc)
+        now = timezone.now().replace(microsecond=0)
         f = DateTimeField()
         res = f.clean(now.strftime("%Y-%m-%dT%H:%M:%S"))
         self.assertEqual(now, res)
 
     def test_initial(self):
-        now = make_aware(datetime.datetime.now().replace(microsecond=0), utc)
+        now = timezone.now().replace(microsecond=0)
         f = DateTimeField(initial=now, required=False)
         res = f.clean(None)
         self.assertEqual(now, res)
@@ -385,7 +388,7 @@ class DateTimeFieldTest(TestCase):
 
 class MonthFieldTest(TestCase):
     def test_now(self):
-        now = make_aware(datetime.datetime.now().replace(microsecond=0), utc)
+        now = timezone.now().replace(microsecond=0)
         f = MonthField()
         res = f.clean(now.strftime("%Y-%m"))
         self.assertEqual(now.date().replace(day=1), res)
