@@ -13,6 +13,7 @@ import six
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
+from django.utils import timezone
 from django.utils.timezone import make_aware, utc
 from typing import Any, Optional, Union
 
@@ -20,7 +21,17 @@ from django_rest_form_fields.compatibility import to_timestamp
 from django_rest_form_fields.exceptions import FileSizeError, FileTypeError
 
 
-class InitialFixMixin(forms.Field):
+class BaseField(forms.Field):
+    """
+    All library fields are inherited from this base
+    Adds source
+    """
+    def __init__(self, *args, **kwargs):
+        self.source = kwargs.pop('source', None)
+        super(BaseField, self).__init__(*args, **kwargs)
+
+
+class InitialFixMixin(BaseField):
     """
     Fixes problem with initial not returned by some form fields
     """
@@ -30,7 +41,7 @@ class InitialFixMixin(forms.Field):
         return self.initial if value is None else value
 
 
-class EmptyStringFixMixing(forms.Field):
+class EmptyStringFixMixing(BaseField):
     """
     Fixes some fields error, returning empty string (not None) when value is not provided
     """
@@ -183,10 +194,6 @@ class TimestampField(RestFloatField):
                 "initial must be int, float or datetime.datetime instance"
             dt = kwargs['initial']
             if isinstance(dt, datetime.datetime):
-                if dt.tzinfo is None and dt.tzinfo.utcoffset(dt) is None:
-                    dt = make_aware(dt, utc)
-                else:
-                    dt = dt.astimezone(pytz.utc)
                 kwargs['initial'] = to_timestamp(dt)
 
         super(TimestampField, self).__init__(*args, min_value=0, max_value=2147483647, **kwargs)
@@ -197,7 +204,7 @@ class TimestampField(RestFloatField):
             # Fix python 3.6 issue with Invalid argument value=0
             return datetime.datetime(1970, 1, 1, tzinfo=pytz.utc)
         elif value is not None:
-            dt = datetime.datetime.fromtimestamp(value)
+            dt = datetime.datetime.utcfromtimestamp(value)
             return make_aware(dt, utc)
         else:
             return value
@@ -205,7 +212,7 @@ class TimestampField(RestFloatField):
     def validate(self, value):  # type: (Optional[int]) -> None
         super(TimestampField, self).validate(value)
         if value is not None:
-            if not self._in_future and value > to_timestamp(datetime.datetime.now()):
+            if not self._in_future and value > to_timestamp(timezone.now()):
                 raise ValidationError("You can't search time in future")
 
 
@@ -520,7 +527,7 @@ class UUIDField(RegexField):
         super(UUIDField, self).__init__(*args, **kwargs)
 
 
-class FileField(forms.FileField, InitialFixMixin):
+class FileField(InitialFixMixin, forms.FileField):
     """
     Wraps django.forms.forms.FileField, adding:
     + file size validation

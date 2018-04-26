@@ -75,7 +75,7 @@ Resulting value: `Optional[int]`
 Child of RestFloatField. Gets timestamp value and converts it into `datetime.datetime` object in UTC.
 Parameter `initial` can be float or `datetime.datetime` value.  
 Parameters:
-* in_future: bool - if False, datetime is validated to be less than `datetime.datetime.now()`  
+* in_future: bool - if False, datetime is validated to be less than `django.utils.timezone.now()`  
 
 Resulting value: `Optional[datetime.datetime]`
 
