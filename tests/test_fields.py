@@ -310,7 +310,6 @@ class TimestampFieldTest(TestCase):
     def test_now(self):
         now = timezone.now().replace(microsecond=0)
         now_ts = to_timestamp(now)
-        print(now_ts, now.timestamp(), now, datetime.datetime.fromtimestamp(now_ts), now.tzinfo)
         f = TimestampField()
         res = f.clean(now_ts)
         self.assertEqual(now, res)
