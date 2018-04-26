@@ -1,8 +1,6 @@
 """
 This file contains functions for different python and django version compatibility
 """
-from time import mktime
-
 import datetime
 
 import pytz
@@ -19,6 +17,4 @@ def to_timestamp(dt):  # type: (datetime.datetime) -> float
     if hasattr(dt, 'timestamp'):
         return dt.timestamp()
     else:
-        # BUG This can get improper dst (summer time) for Russia, so time may differ in 1 hour
-        # Seems that this is a pytz bug
-        return mktime(dt.timetuple()) + dt.microsecond / 1e6
+        return (dt - datetime.datetime(1970, 1, 1, 0, 0, 0, tzinfo=pytz.utc)).total_seconds()
