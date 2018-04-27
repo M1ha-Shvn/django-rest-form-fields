@@ -527,7 +527,7 @@ class UUIDField(RegexField):
         super(UUIDField, self).__init__(*args, **kwargs)
 
 
-class FileField(InitialFixMixin, forms.FileField):
+class FileField(forms.FileField):
     """
     Wraps django.forms.forms.FileField, adding:
     + file size validation
@@ -560,3 +560,7 @@ class FileField(InitialFixMixin, forms.FileField):
         if self.size is not None and value:
             if value.size > self.size:
                 raise FileSizeError(self.size, value.size)
+
+    def clean(self, data, initial=None):
+        # FileField provides InitialFixMixin functionality with special parameter
+        return super(FileField, self).clean(data, initial=initial if initial is not None else self.initial)
