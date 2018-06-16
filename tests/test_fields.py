@@ -8,18 +8,29 @@ import random
 import re
 import uuid
 
+from django.core.validators import BaseValidator
 from django.utils import timezone
 from io import BytesIO
 from unittest import TestCase
 
 import six
 from django.core.exceptions import ValidationError
-from django.utils.timezone import make_aware, utc
+from django.utils.timezone import utc
 
 from django_rest_form_fields.compatibility import to_timestamp
 from django_rest_form_fields.fields import RestBooleanField, LowerCaseEmailField, TimestampField, DateUnitField, \
     ColorField, IdArrayField, IdSetField, TruncatedCharField, JsonField, ArrayField, UrlField, RestCharField, \
     RestChoiceField, RestIntegerField, RegexField, UUIDField, DateTimeField, MonthField, FileField, RestFloatField
+
+
+class TestErrorValidator(BaseValidator):
+    """
+    I use this validator to raise error in run_validators for test purposes
+    """
+    compare = lambda self, a, b: True
+    clean = lambda self, x: 0
+    message = "This validator always raises error, if run_validators is run"
+    code = 'always_error'
 
 
 class LowerCaseEmailFieldTest(TestCase):
@@ -38,6 +49,13 @@ class LowerCaseEmailFieldTest(TestCase):
     def test_initial(self):
         f = LowerCaseEmailField(required=False, initial='test@mail.ru')
         self.assertEqual('test@mail.ru', f.clean(None))
+
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = LowerCaseEmailField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean('')
 
 
 class RestBooleanFieldTest(TestCase):
@@ -111,6 +129,13 @@ class RestBooleanFieldTest(TestCase):
         with self.assertRaises(ValidationError):
             f.clean(None)
 
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = RestBooleanField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean('')
+
 
 class RestIntegerFieldTest(TestCase):
     def test_correct(self):
@@ -146,6 +171,13 @@ class RestIntegerFieldTest(TestCase):
 
         f = RestIntegerField(required=False, initial=123)
         self.assertEqual(123, f.clean(None))
+
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = RestIntegerField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean('')
 
 
 class RestFloatFieldTest(TestCase):
@@ -183,6 +215,13 @@ class RestFloatFieldTest(TestCase):
         f = RestFloatField(required=False, initial=123.0)
         self.assertEqual(123, f.clean(None))
 
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = RestFloatField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean('')
+
 
 class RestCharFieldTest(TestCase):
     def test_required(self):
@@ -197,6 +236,17 @@ class RestCharFieldTest(TestCase):
         test_data = "test_string"
         f = RestCharField(required=False, initial=test_data)
         self.assertEqual(test_data, f.clean(None))
+
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = RestCharField(required=False, initial='', min_length=1)
+        with self.assertRaises(ValidationError):
+            f.clean('')
+
+        f2 = RestCharField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f2.clean('')
 
 
 class RegexFieldValidator(TestCase):
@@ -269,6 +319,13 @@ class RegexFieldValidator(TestCase):
         f = RegexField()
         self.assertEqual(test_data, f.clean(test_data))
 
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = RegexField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean('')
+
 
 class RestChoiceFieldTest(TestCase):
     def test_choices_array(self):
@@ -304,6 +361,13 @@ class RestChoiceFieldTest(TestCase):
         test_data = "test_string"
         f = RestChoiceField(required=False, initial=test_data)
         self.assertEqual(test_data, f.clean(None))
+
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = RestChoiceField(validators=[TestErrorValidator(0)], choices=['abc', ''])
+        with self.assertRaises(ValidationError):
+            f.clean('')
 
 
 class TimestampFieldTest(TestCase):
@@ -362,6 +426,13 @@ class TimestampFieldTest(TestCase):
         with self.assertRaises(ValidationError):
             f.clean(None)
 
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = TimestampField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean('')
+
 
 class DateTimeFieldTest(TestCase):
     def test_now(self):
@@ -384,6 +455,13 @@ class DateTimeFieldTest(TestCase):
         with self.assertRaises(ValidationError):
             f.clean(None)
 
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = DateTimeField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean('')
+
 
 class MonthFieldTest(TestCase):
     def test_now(self):
@@ -404,6 +482,13 @@ class MonthFieldTest(TestCase):
         f = MonthField()
         with self.assertRaises(ValidationError):
             f.clean(None)
+
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = MonthField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean('')
 
 
 class DateUnitFieldTest(TestCase):
@@ -435,6 +520,13 @@ class DateUnitFieldTest(TestCase):
     def test_initial(self):
         f = DateUnitField(required=False, initial='day')
         self.assertEqual('day', f.clean(None))
+
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = DateUnitField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean('day')
 
 
 class ColorFieldTest(TestCase):
@@ -486,6 +578,13 @@ class TruncatedCharFieldTest(TestCase):
         f = TruncatedCharField(required=False, initial='afafaf')
         self.assertEqual('afafaf', f.clean(None))
 
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = TruncatedCharField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean('')
+
 
 class JsonFieldTest(TestCase):
     TEST_SCHEMA = {
@@ -514,6 +613,8 @@ class JsonFieldTest(TestCase):
         self.assertEqual(None, f.clean(None))
 
         f = JsonField()
+        self.assertEqual({}, f.clean({}))
+        self.assertEqual([], f.clean([]))
         with self.assertRaises(ValidationError):
             f.clean(None)
 
@@ -521,6 +622,13 @@ class JsonFieldTest(TestCase):
         test_data = {'inital': True}
         f = JsonField(required=False, initial=test_data)
         self.assertEqual(test_data, f.clean(None))
+
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = JsonField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean({})
 
 
 class ArrayFieldTest(TestCase):
@@ -580,6 +688,7 @@ class ArrayFieldTest(TestCase):
         self.assertEqual(None, f.clean(None))
 
         f = ArrayField()
+        self.assertEqual([], f.clean([]))
         with self.assertRaises(ValidationError):
             f.clean(None)
 
@@ -587,6 +696,13 @@ class ArrayFieldTest(TestCase):
         test_data = [1, 2, 3]
         f = ArrayField(required=False, initial=test_data)
         self.assertEqual(test_data, f.clean(None))
+
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = ArrayField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean([])
 
 
 class IdArrayFieldTest(TestCase):
@@ -604,6 +720,7 @@ class IdArrayFieldTest(TestCase):
         self.assertIsNone(f.clean(None))
 
         f = IdArrayField()
+        self.assertEqual([], f.clean([]))
         with self.assertRaises(ValidationError):
             f.clean(None)
 
@@ -611,6 +728,13 @@ class IdArrayFieldTest(TestCase):
         test_data = [1, 2, 3]
         f = IdArrayField(required=False, initial=test_data)
         self.assertListEqual(test_data, f.clean(None))
+
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = IdArrayField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean([])
 
 
 class IdSetFieldTest(TestCase):
@@ -628,6 +752,7 @@ class IdSetFieldTest(TestCase):
         self.assertIsNone(f.clean(None))
 
         f = IdSetField()
+        self.assertEqual(set(), f.clean([]))
         with self.assertRaises(ValidationError):
             f.clean(None)
 
@@ -635,6 +760,13 @@ class IdSetFieldTest(TestCase):
         test_data = {1, 2, 3}
         f = IdSetField(required=False, initial=test_data)
         self.assertEqual(test_data, f.clean(None))
+
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = IdSetField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean([])
 
 
 class UrlFieldTest(TestCase):
@@ -670,6 +802,13 @@ class UrlFieldTest(TestCase):
         with self.assertRaises(ValidationError):
             f.clean(test_data)
 
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = UrlField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean('')
+
 
 class UUIDFieldTest(TestCase):
     def test_uuid_valid(self):
@@ -691,6 +830,13 @@ class UUIDFieldTest(TestCase):
         init = str(uuid.uuid4())
         f = UUIDField(required=False, initial=init)
         self.assertEqual(init, f.clean(None))
+
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = UUIDField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean('')
 
 
 class FileFieldTest(TestCase):
@@ -754,3 +900,10 @@ class FileFieldTest(TestCase):
         init = self._get_test_file()
         f = FileField(required=False, initial=init)
         self.assertEqual(init, f.clean(None))
+
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = FileField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean('')

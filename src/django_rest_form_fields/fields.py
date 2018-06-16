@@ -45,6 +45,13 @@ class EmptyStringFixMixing(BaseField):
     """
     Fixes some fields error, returning empty string (not None) when value is not provided
     """
+    # All empty values are considered by django as "No value" by default.
+    # This causes a list of errors in REST model:
+    # 1) JsonField and child classes don't allow to pass empty arrays and dicts if required=True
+    # 2) RestCharField and child classes don't allow to pass empty string if required=True
+    # 3) run_validators() method is not called if value is in empty_values, so min_length validation doesn't work
+    #    for RestCharField and value=''
+    empty_values = []
 
     def to_python(self, value):  # type: (Any) -> Optional[str]
         return None if value is None else super(EmptyStringFixMixing, self).to_python(value)
@@ -58,7 +65,7 @@ class EmptyStringFixMixing(BaseField):
         if value is None:
             value = self.to_python(value)
             self.validate(value)
-            # TODO I don't call self.run_validators() here, as they don't expect None, but empty string
+            # BUG I don't call self.run_validators() here, as they don't expect None, but empty string
             return self.initial
         else:
             return super(EmptyStringFixMixing, self).clean(value)
@@ -80,12 +87,7 @@ class RestCharField(EmptyStringFixMixing, forms.CharField):
     + Changes default value - None, not empty string
     + Fixes initial value bug (CharField returns empty string, ignoring 'initial' parameter)
     """
-
-    def __init__(self, *args, **kwargs):
-        super(RestCharField, self).__init__(*args, **kwargs)
-
-        # Remove 'None' from values, that return empty string, if it is there
-        self.empty_values = [x for x in self.empty_values if x is not None]
+    pass
 
 
 class RegexField(RestCharField):
