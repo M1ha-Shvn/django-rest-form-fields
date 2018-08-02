@@ -127,12 +127,13 @@ class RestChoiceField(EmptyStringFixMixing, forms.ChoiceField):
 
     def __init__(self, *args, **kwargs):
         choices = kwargs.pop('choices', None)
-        if choices:
-            choices = [ch if isinstance(ch, (list, tuple)) else (ch, ch) for ch in choices]
-        else:
-            choices = []
-        # super(RestChoiceField, self).__init__(*args, choices=choices, **kwargs)
+        choices = [ch if isinstance(ch, (list, tuple)) else (ch, ch) for ch in choices] if choices else []
+
         EmptyStringFixMixing.__init__(self, *args, **kwargs)
+
+        # This parameter was processed above, but was not removed
+        kwargs.pop('source', None)
+
         forms.ChoiceField.__init__(self, *args, choices=choices, **kwargs)
 
 
