@@ -17,8 +17,8 @@ from django.utils import timezone
 from django.utils.timezone import make_aware, utc
 from typing import Any, Optional, Union
 
-from django_rest_form_fields.compatibility import to_timestamp
-from django_rest_form_fields.exceptions import FileSizeError, FileTypeError
+from .compatibility import to_timestamp, get_pattern_type
+from .exceptions import FileSizeError, FileTypeError
 
 
 class BaseField(forms.Field):
@@ -98,7 +98,7 @@ class RegexField(RestCharField):
         self.regex = kwargs.pop('regex', None)
         self.flags = kwargs.pop('flags', 0)
 
-        assert self.regex is None or isinstance(self.regex, (six.string_types, re._pattern_type)),\
+        assert self.regex is None or isinstance(self.regex, (six.string_types, get_pattern_type())),\
             'regex must be string if given'
         assert isinstance(self.flags, int), 'flags must be integer'
 
