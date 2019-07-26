@@ -4,11 +4,10 @@ This file contains a number of custom fields to validate data with django forms
 
 import datetime
 import json
-import os
-import re
-
 import jsonschema
+import os
 import pytz
+import re
 import six
 from django import forms
 from django.core.exceptions import ValidationError
@@ -26,6 +25,7 @@ class BaseField(forms.Field):
     All library fields are inherited from this base
     Adds source
     """
+
     def __init__(self, *args, **kwargs):
         self.source = kwargs.pop('source', None)
         super(BaseField, self).__init__(*args, **kwargs)
@@ -94,11 +94,12 @@ class RegexField(RestCharField):
     """
     Wraps CharField to validate via regular expression
     """
+
     def __init__(self, *args, **kwargs):
         self.regex = kwargs.pop('regex', None)
         self.flags = kwargs.pop('flags', 0)
 
-        assert self.regex is None or isinstance(self.regex, (six.string_types, get_pattern_type())),\
+        assert self.regex is None or isinstance(self.regex, (six.string_types, get_pattern_type())), \
             'regex must be string if given'
         assert isinstance(self.flags, int), 'flags must be integer'
 
@@ -223,6 +224,7 @@ class DateTimeField(RestCharField):
     """
     Parses given string as datetime by given mask with datetime.datetime.strptime() method
     """
+    base_type = datetime.datetime
 
     def __init__(self, *args, **kwargs):
         """
@@ -240,7 +242,7 @@ class DateTimeField(RestCharField):
 
     def clean(self, value):  # type: (Any) -> datetime.datetime
         value = super(DateTimeField, self).clean(value)
-        if value is not None and not isinstance(value, datetime.datetime):
+        if value is not None and not isinstance(value, self.base_type):
             try:
                 dt = datetime.datetime.strptime(value, self.mask)
             except (ValueError, TypeError):
@@ -249,6 +251,28 @@ class DateTimeField(RestCharField):
             return make_aware(dt, utc)
         else:
             return value
+
+
+class DateField(DateTimeField):
+    """
+    Parses month with datetime.datetime.strptime() method. Default format is %Y-%m.
+    Returns datetime.date with first day of month.
+    """
+    base_type = datetime.date
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initializes field
+        :param args: Positional arguments
+        :param mask: Mask to parse month string with datetime.datetime.strptime() method
+        :param kwargs: Named arguments
+        """
+        mask = kwargs.pop("mask", "%Y-%m-%d")
+        super(DateField, self).__init__(*args, mask=mask, **kwargs)
+
+    def clean(self, value):  # type (Any) -> datetime.date
+        value = super(DateField, self).clean(value)
+        return value.date() if isinstance(value, datetime.datetime) else value
 
 
 class MonthField(DateTimeField):
