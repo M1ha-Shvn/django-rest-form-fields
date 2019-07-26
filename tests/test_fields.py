@@ -6,21 +6,20 @@ import datetime
 import json
 import random
 import re
+import six
 import uuid
-
+from django.core.exceptions import ValidationError
 from django.core.validators import BaseValidator
 from django.utils import timezone
+from django.utils.timezone import utc
 from io import BytesIO
 from unittest import TestCase
-
-import six
-from django.core.exceptions import ValidationError
-from django.utils.timezone import utc
 
 from django_rest_form_fields.compatibility import to_timestamp
 from django_rest_form_fields.fields import RestBooleanField, LowerCaseEmailField, TimestampField, DateUnitField, \
     ColorField, IdArrayField, IdSetField, TruncatedCharField, JsonField, ArrayField, UrlField, RestCharField, \
-    RestChoiceField, RestIntegerField, RegexField, UUIDField, DateTimeField, MonthField, FileField, RestFloatField
+    RestChoiceField, RestIntegerField, RegexField, UUIDField, DateTimeField, MonthField, FileField, RestFloatField, \
+    DateField
 
 
 class TestErrorValidator(BaseValidator):
@@ -463,6 +462,35 @@ class DateTimeFieldTest(TestCase):
             f.clean('')
 
 
+class DateFieldTest(TestCase):
+    def test_today(self):
+        today = datetime.date.today()
+        f = DateField()
+        res = f.clean(today.isoformat())
+        self.assertEqual(today, res)
+
+    def test_initial(self):
+        today = datetime.date.today()
+        f = DateField(initial=today, required=False)
+        res = f.clean(None)
+        self.assertEqual(today, res)
+
+    def test_required(self):
+        f = DateField(required=False)
+        self.assertEqual(None, f.clean(None))
+
+        f = DateField()
+        with self.assertRaises(ValidationError):
+            f.clean(None)
+
+    def test_empty_value_validators(self):
+        # By default django ignores skips run_validators methods, if value is in empty_values
+        # It's not correct for REST, as empty value is not equal to None value now
+        f = DateField(validators=[TestErrorValidator(0)])
+        with self.assertRaises(ValidationError):
+            f.clean('')
+
+
 class MonthFieldTest(TestCase):
     def test_now(self):
         now = timezone.now().replace(microsecond=0)
@@ -879,10 +907,10 @@ class FileFieldTest(TestCase):
 
         test_file = self._get_test_file('pdf')
 
-        f = FileField(max_size=2*1024*1024)
+        f = FileField(max_size=2 * 1024 * 1024)
         self.assertEqual(test_file, f.clean(test_file))
 
-        test_file.size = 1*1024*1024
+        test_file.size = 1 * 1024 * 1024
         self.assertEqual(test_file, f.clean(test_file))
 
         test_file.size = 2 * 1024 * 1024 - 1
