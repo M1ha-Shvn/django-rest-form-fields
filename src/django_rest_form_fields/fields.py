@@ -4,6 +4,8 @@ This file contains a number of custom fields to validate data with django forms
 
 import datetime
 import json
+from typing import Any, Optional, Union
+
 import jsonschema
 import os
 import pytz
@@ -14,7 +16,6 @@ from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.utils import timezone
 from django.utils.timezone import make_aware, utc
-from typing import Any, Optional, Union
 
 from .compatibility import to_timestamp, PatternType
 from .exceptions import FileSizeError, FileTypeError
@@ -78,6 +79,7 @@ class EmptyStringFixMixing(BaseField):
         """
         if value is None and self.required:
             raise ValidationError(self.error_messages['required'], code='required')
+
         super(EmptyStringFixMixing, self).validate(value)
 
 
@@ -99,7 +101,7 @@ class RegexField(RestCharField):
         self.regex = kwargs.pop('regex', None)
         self.flags = kwargs.pop('flags', 0)
 
-        assert self.regex is None or isinstance(self.regex, (six.string_types, PatternType)),\
+        assert self.regex is None or isinstance(self.regex, (six.string_types, PatternType)), \
             'regex must be string if given'
         assert isinstance(self.flags, int), 'flags must be integer'
 
@@ -128,14 +130,25 @@ class RestChoiceField(EmptyStringFixMixing, forms.ChoiceField):
 
     def __init__(self, *args, **kwargs):
         choices = kwargs.pop('choices', None)
-        choices = [ch if isinstance(ch, (list, tuple)) else (ch, ch) for ch in choices] if choices else []
+        if choices is not None:
+            kwargs['choices'] = [ch if isinstance(ch, (list, tuple)) else (ch, ch) for ch in choices]
 
         EmptyStringFixMixing.__init__(self, *args, **kwargs)
 
         # This parameter was processed above, but was not removed
         kwargs.pop('source', None)
 
-        forms.ChoiceField.__init__(self, *args, choices=choices, **kwargs)
+        forms.ChoiceField.__init__(self, *args, **kwargs)
+
+    def validate(self, value):
+        # Fixes bug with empty string passing choices
+        if value is not None and self.choices and not self.valid_value(value):
+            raise ValidationError(
+                self.error_messages['invalid_choice'],
+                code='invalid_choice',
+                params={'value': value},
+            )
+        super(RestChoiceField, self).validate(value)
 
 
 class RestIntegerField(InitialFixMixin, forms.IntegerField):
