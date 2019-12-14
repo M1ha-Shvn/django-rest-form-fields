@@ -24,7 +24,3 @@ def to_timestamp(dt):  # type: (datetime.datetime) -> float
         return dt.timestamp()
     else:
         return (dt - datetime.datetime(1970, 1, 1, 0, 0, 0, tzinfo=pytz.utc)).total_seconds()
-
-
-def get_pattern_type():
-    return re.Pattern if hasattr(re, 'Pattern') else re._pattern_type
