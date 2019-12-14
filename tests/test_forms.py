@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from django.forms import CharField
 from django.db import models
-from django_rest_form_fields import RestCharField
+from django_rest_form_fields import RestCharField, RestChoiceField
 from django_rest_form_fields.forms import BaseForm, BaseModelForm
 
 
@@ -41,6 +41,10 @@ class SourceBaseFormTest(TestCase):
                         {'dest': 'init'})
         self._test_form(BaseForm, {'dest': RestCharField(source='src', required=False, initial='init')},
                         {'dest': 'test'})
+
+    def test_choice_field(self):
+        # The was a bug in RestChoiceField due to duplicate init
+        self._test_form(BaseForm, {'dest': RestChoiceField(source='src', choices=('test',))}, {'dest': 'test'})
 
 
 class SourceBaseModelFormTest(TestCase):

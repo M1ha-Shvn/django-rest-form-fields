@@ -2,7 +2,7 @@
 Extended form fields to validate REST-request data via django.forms.
 
 ## Requirements
-* Python 2.7 or Python 3.3+
+* Python 2.7 or Python 3.4+
 * Django >= 1.7
 * pytz
 * jsonschema
