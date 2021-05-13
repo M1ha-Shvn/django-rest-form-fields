@@ -19,6 +19,7 @@ from django.utils.timezone import make_aware, utc
 
 from .compatibility import to_timestamp, PatternType
 from .exceptions import FileSizeError, FileTypeError
+from .validators import URLValidatorWithUnderscoreDomain
 
 
 class BaseField(forms.Field):
@@ -534,6 +535,10 @@ class UrlField(RegexField):
     Field validates url string
     """
 
+    def __init__(self, *args, with_underscore_domain: bool = True, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.with_underscore_domain = with_underscore_domain
+
     def to_python(self, value):  # type: (Any) -> Optional[str]
         if isinstance(value, six.string_types):
             value = value.strip()
@@ -542,7 +547,8 @@ class UrlField(RegexField):
     def validate(self, value):  # type: (Optional[str]) -> None
         super(UrlField, self).validate(value)
         if isinstance(value, six.string_types):
-            v = URLValidator(schemes=['http', 'https'])
+            validator_cls = URLValidatorWithUnderscoreDomain if self.with_underscore_domain else URLValidator
+            v = validator_cls(schemes=['http', 'https'])
             v(value)
 
 

@@ -228,10 +228,11 @@ Parameters:
 
 Resulting value: `Optional[Set[int]]`
 
-### UrlField(*args, source: Optional[str] = None, **kwargs)
+### UrlField(*args, with_underscore_domain: Optional[bool] = True, source: Optional[str] = None, **kwargs)
 RegexField child. Validates string as URL with `django.core.validators.URLValidator`
 
 Parameters:
+* with_underscore_domain: Optional[bool] - allow domain with underscore character.
 * source: Optional[str] - name of attribute to get data from. Defaults to form attribute name.
 
 Resulting value: `Optional[str]`
