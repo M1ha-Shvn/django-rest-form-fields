@@ -834,6 +834,18 @@ class UrlFieldTest(TestCase):
         with self.assertRaises(ValidationError):
             f.clean(test_data)
 
+    def test_underscore_domain_allowed(self):
+        test_data = 'http://test_test.ru/test.jpg'
+        f = UrlField()
+        self.assertEqual(test_data, f.clean(test_data))
+
+    def test_underscore_domain_rejected(self):
+        test_data = 'http://test_test.ru/test.jpg'
+        f = UrlField(with_underscore_domain=False)
+
+        with self.assertRaises(ValidationError):
+            self.assertEqual(test_data, f.clean(test_data))
+
     def test_empty_value_validators(self):
         # By default django skips run_validators methods, if value is in empty_values
         # It's not correct for REST, as empty value is not equal to None value now
