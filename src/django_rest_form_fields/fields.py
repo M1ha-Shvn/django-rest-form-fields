@@ -535,7 +535,7 @@ class UrlField(RegexField):
     Field validates url string
     """
 
-    def __init__(self, *args, with_underscore_domain: bool = True, **kwargs):
+    def __init__(self, *args, with_underscore_domain=True, **kwargs):  # type (bool) -> None
         super().__init__(*args, **kwargs)
         self.with_underscore_domain = with_underscore_domain
 
