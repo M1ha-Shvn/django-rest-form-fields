@@ -25,8 +25,8 @@ class TestErrorValidator(BaseValidator):
     """
     I use this validator to raise error in run_validators for test purposes
     """
-    compare = lambda self, a, b: True
-    clean = lambda self, x: 0
+    compare = lambda self, a, b: True  # noqa: E731
+    clean = lambda self, x: 0  # noqa: E731
     message = "This validator always raises error, if run_validators is run"
     code = 'always_error'
 
