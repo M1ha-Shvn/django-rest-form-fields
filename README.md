@@ -1,3 +1,5 @@
+[![Python unit tests](https://github.com/M1ha-Shvn/django-rest-form-fields/actions/workflows/python-tests.yml/badge.svg)](https://github.com/M1ha-Shvn/django-rest-form-fields/actions/workflows/python-tests.yml)  [![Upload Python Package](https://github.com/M1ha-Shvn/django-rest-form-fields/actions/workflows/python-publish.yml/badge.svg)](https://github.com/M1ha-Shvn/django-rest-form-fields/actions/workflows/python-publish.yml) [![Downloads](https://pepy.tech/badge/django-rest-form-fields/month)](https://pepy.tech/project/django-rest-form-fields)
+
 # django-rest-form-fields
 Extended form fields to validate REST-request data via django.forms.
 
