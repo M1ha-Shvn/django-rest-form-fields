@@ -1,0 +1,11 @@
+---
+version: "3.9"
+services:
+  run_tests:
+    image: django-rest-form-fields
+    build:
+      context: .
+      args:
+        - PYTHON_IMAGE_TAG=latest
+    mem_limit: 1g
+    cpus: 1

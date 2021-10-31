@@ -1,13 +1,16 @@
+[![Python unit tests](https://github.com/M1ha-Shvn/django-rest-form-fields/actions/workflows/python-tests.yml/badge.svg)](https://github.com/M1ha-Shvn/django-rest-form-fields/actions/workflows/python-tests.yml)  [![Upload Python Package](https://github.com/M1ha-Shvn/django-rest-form-fields/actions/workflows/python-publish.yml/badge.svg)](https://github.com/M1ha-Shvn/django-rest-form-fields/actions/workflows/python-publish.yml) [![Downloads](https://pepy.tech/badge/django-rest-form-fields/month)](https://pepy.tech/project/django-rest-form-fields)
+
 # django-rest-form-fields
 Extended form fields to validate REST-request data via django.forms.
 
 ## Requirements
-* Python 2.7 or Python 3.4+
-* Django >= 1.7
-* pytz
+* Python 3.6+  
+  Other versions may also work but not tested automatically
+* Django 2.1+  
+  Other versions may also work but not tested automatically
 * jsonschema
-* six
-* typing
+* pytz
+* typing; python_version < '3.5'
 
 ## Installation
 Install via pip:  
@@ -264,3 +267,18 @@ Parameters:
 * source: Optional[str] - name of attribute to get data from. Defaults to form attribute name.
 
 Resulting value: `Optional[file]`
+
+
+## Running tests
+### Running in docker
+1. Install [docker and docker-compose](https://www.docker.com/)
+2. Run `docker build . --tag django-rest-form-fields` in project directory
+3. Run `docker-compose run run_tests` in project directory
+
+### Running in virtual environment
+1. Install python
+2. [Create virtual environment](https://docs.python.org/3/tutorial/venv.html)
+3. Install pip requirements   
+  `pip3 install -U -r requirements-test.txt`  
+4. Start tests  
+  `python3 runtests.py`

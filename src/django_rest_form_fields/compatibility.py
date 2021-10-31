@@ -3,19 +3,24 @@ This file contains functions for different python and django version compatibili
 """
 import datetime
 
-import pytz
 import re
-from django.utils.timezone import make_aware, utc
+import sys
+
+import pytz
+from django.utils.timezone import make_aware
 
 if hasattr(re, 'Pattern'):
     PatternType = re.Pattern
 else:
-    PatternType = re._pattern_type
+    PatternType = re._pattern_type  # noqa
+
+# six.string_types replacement in order to remove dependency
+string_types = (str,) if sys.version_info[0] == 3 else (str, unicode)  # noqa F821
 
 
 def to_timestamp(dt):  # type: (datetime.datetime) -> float
     if dt.tzinfo is None or dt.tzinfo.utcoffset(dt) is None:
-        dt = make_aware(dt, utc)
+        dt = make_aware(dt, pytz.utc)
     else:
         dt = dt.astimezone(pytz.utc)
 

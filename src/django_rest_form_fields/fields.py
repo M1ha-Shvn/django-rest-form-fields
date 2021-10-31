@@ -10,14 +10,13 @@ import jsonschema
 import os
 import pytz
 import re
-import six
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.utils import timezone
-from django.utils.timezone import make_aware, utc
+from django.utils.timezone import make_aware
 
-from .compatibility import to_timestamp, PatternType
+from .compatibility import to_timestamp, PatternType, string_types
 from .exceptions import FileSizeError, FileTypeError
 from .validators import URLValidatorWithUnderscoreDomain
 
@@ -102,7 +101,7 @@ class RegexField(RestCharField):
         self.regex = kwargs.pop('regex', None)
         self.flags = kwargs.pop('flags', 0)
 
-        assert self.regex is None or isinstance(self.regex, (six.string_types, PatternType)), \
+        assert self.regex is None or isinstance(self.regex, (string_types, PatternType)), \
             'regex must be string if given'
         assert isinstance(self.flags, int), 'flags must be integer'
 
@@ -223,7 +222,7 @@ class TimestampField(RestFloatField):
             return datetime.datetime(1970, 1, 1, tzinfo=pytz.utc)
         elif value is not None:
             dt = datetime.datetime.utcfromtimestamp(value)
-            return make_aware(dt, utc)
+            return make_aware(dt, pytz.utc)
         else:
             return value
 
@@ -248,7 +247,7 @@ class DateTimeField(RestCharField):
         :param kwargs: Named arguments
         """
         mask = kwargs.pop("mask", "%Y-%m-%dT%H:%M:%S")
-        assert isinstance(mask, six.string_types), "'mask' parameter must be string"
+        assert isinstance(mask, string_types), "'mask' parameter must be string"
 
         super(DateTimeField, self).__init__(*args, **kwargs)
 
@@ -262,7 +261,7 @@ class DateTimeField(RestCharField):
             except (ValueError, TypeError):
                 raise ValidationError("Invalid value format (%s)" % self.mask)
 
-            return make_aware(dt, utc)
+            return make_aware(dt, pytz.utc)
         else:
             return value
 
@@ -345,7 +344,7 @@ class RestBooleanField(RestCharField):
         """Returns a Python boolean object."""
         if value is None:
             return None
-        elif isinstance(value, six.string_types) and value.lower() in ('false', '0', ''):
+        elif isinstance(value, string_types) and value.lower() in ('false', '0', ''):
             value = False
         else:
             value = bool(value)
@@ -361,7 +360,7 @@ class LowerCaseEmailField(forms.EmailField):
     """
 
     def to_python(self, value):  # type: (Any) -> Optional[str]
-        return value.lower() if isinstance(value, six.string_types) else value
+        return value.lower() if isinstance(value, string_types) else value
 
     def clean(self, value):
         if value is not None:
@@ -428,7 +427,7 @@ class JsonField(RestCharField):
     def to_python(self, value):  # type: (Any) -> Optional[Union[dict, list]]
         if value is None or isinstance(value, (list, dict)):
             return value
-        elif isinstance(value, six.string_types):
+        elif isinstance(value, string_types):
             try:
                 return json.loads(value)
             except Exception as e:
@@ -482,7 +481,7 @@ class ArrayField(JsonField):
             return super(ArrayField, self).to_python(value)
         elif isinstance(value, dict):
             raise ValidationError('Value is expected to be JSON array, not object')
-        elif isinstance(value, six.string_types):
+        elif isinstance(value, string_types):
             if value.startswith('[') or value.endswith(']'):
                 return super(ArrayField, self).to_python(value)
             elif value.startswith('{') and value.endswith('}'):
@@ -536,17 +535,17 @@ class UrlField(RegexField):
     """
 
     def __init__(self, *args, with_underscore_domain=True, **kwargs):  # type (bool) -> None
-        super().__init__(*args, **kwargs)
+        super(UrlField, self).__init__(*args, **kwargs)
         self.with_underscore_domain = with_underscore_domain
 
     def to_python(self, value):  # type: (Any) -> Optional[str]
-        if isinstance(value, six.string_types):
+        if isinstance(value, string_types):
             value = value.strip()
         return super(UrlField, self).to_python(value)
 
     def validate(self, value):  # type: (Optional[str]) -> None
         super(UrlField, self).validate(value)
-        if isinstance(value, six.string_types):
+        if isinstance(value, string_types):
             validator_cls = URLValidatorWithUnderscoreDomain if self.with_underscore_domain else URLValidator
             v = validator_cls(schemes=['http', 'https'])
             v(value)
@@ -559,7 +558,7 @@ class HexField(RestCharField):
 
     def validate(self, value):  # type: (Optional[str]) -> None
         super(HexField, self).validate(value)
-        if isinstance(value, six.string_types) and not re.match(r'[a-z0-9]*', value):
+        if isinstance(value, string_types) and not re.match(r'[a-z0-9]*', value):
             raise ValidationError("Field can contain only hexadecimal small characters (a-z, 0-9)")
 
 
