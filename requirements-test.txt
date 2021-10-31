@@ -1,0 +1,8 @@
+django>=1.7
+jsonschema
+psycopg2-binary
+pytz
+typing; python_version < '3.5'
+
+# Linter
+flake8

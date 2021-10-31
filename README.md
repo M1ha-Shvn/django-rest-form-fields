@@ -277,6 +277,6 @@ Resulting value: `Optional[file]`
 1. Install python
 2. [Create virtual environment](https://docs.python.org/3/tutorial/venv.html)
 3. Install pip requirements   
-  `pip3 install -U -r requirements.txt`  
+  `pip3 install -U -r requirements-test.txt`  
 4. Start tests  
   `python3 runtests.py`
