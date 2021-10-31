@@ -1,7 +1,5 @@
 django (>=1.7)
-pytz
 jsonschema
-six
-typing
-psycopg2
-typing
+psycopg2-binary
+pytz; python_version < '3.3'
+typing; python_version < '3.5'
