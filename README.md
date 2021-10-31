@@ -265,3 +265,18 @@ Parameters:
 * source: Optional[str] - name of attribute to get data from. Defaults to form attribute name.
 
 Resulting value: `Optional[file]`
+
+
+## Running tests
+### Running in docker
+1. Install [docker and docker-compose](https://www.docker.com/)
+2. Run `docker build . --tag django-rest-form-fields` in project directory
+3. Run `docker-compose run run_tests` in project directory
+
+### Running in virtual environment
+1. Install python
+2. [Create virtual environment](https://docs.python.org/3/tutorial/venv.html)
+3. Install pip requirements   
+  `pip3 install -U -r requirements.txt`  
+4. Start tests  
+  `python3 runtests.py`

@@ -18,7 +18,7 @@ class SourceFormMixin(object):
         """
         self._src_replaces = {}
         result_fields = {}
-        for name, f in self.fields.items():
+        for name, f in self.fields.items():  # noqa
             if getattr(f, 'source', None):
                 self._src_replaces[f.source] = name
                 result_fields[f.source] = f
@@ -32,7 +32,7 @@ class SourceFormMixin(object):
         Replace source field names with attribute names
         :return: None
         """
-        self.cleaned_data = {self._src_replaces.get(name, name): val for name, val in self.cleaned_data.items()}
+        self.cleaned_data = {self._src_replaces.get(name, name): val for name, val in self.cleaned_data.items()}  # noqa
 
 
 class BaseForm(forms.Form, SourceFormMixin):

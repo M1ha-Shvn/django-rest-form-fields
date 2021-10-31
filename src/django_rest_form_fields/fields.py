@@ -16,7 +16,7 @@ from django.core.validators import URLValidator
 from django.utils import timezone
 from django.utils.timezone import make_aware
 
-from .compatibility import to_timestamp, PatternType
+from .compatibility import to_timestamp, PatternType, string_types
 from .exceptions import FileSizeError, FileTypeError
 from .validators import URLValidatorWithUnderscoreDomain
 
@@ -535,7 +535,7 @@ class UrlField(RegexField):
     """
 
     def __init__(self, *args, with_underscore_domain=True, **kwargs):  # type (bool) -> None
-        super().__init__(*args, **kwargs)
+        super(UrlField, self).__init__(*args, **kwargs)
         self.with_underscore_domain = with_underscore_domain
 
     def to_python(self, value):  # type: (Any) -> Optional[str]

@@ -23,5 +23,5 @@ setup(
     description='Extended form fields to validate REST-request data via django.forms',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    requires=requires
+    install_requires=requires
 )
