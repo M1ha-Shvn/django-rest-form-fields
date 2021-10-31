@@ -6,10 +6,9 @@ Extended form fields to validate REST-request data via django.forms.
   Other versions may also work but not tested automatically
 * Django 2.1+  
   Other versions may also work but not tested automatically
-* pytz
 * jsonschema
-* six
-* typing
+* pytz
+* typing; python_version < '3.5'
 
 ## Installation
 Install via pip:  

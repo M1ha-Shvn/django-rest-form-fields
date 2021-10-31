@@ -6,7 +6,6 @@ import datetime
 import json
 import random
 import re
-import six
 import uuid
 from django.core.exceptions import ValidationError
 from django.core.validators import BaseValidator
@@ -886,7 +885,8 @@ class UUIDFieldTest(TestCase):
 class FileFieldTest(TestCase):
     @staticmethod
     def _get_test_file(extension='txt'):
-        f = BytesIO(six.b('test'))
+        import six
+        f = BytesIO(b'test')
         f.name = 'test.' + extension
         f.size = len(f.getvalue())
         return f
