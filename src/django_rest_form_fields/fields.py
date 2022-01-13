@@ -52,7 +52,7 @@ class EmptyStringFixMixing(BaseField):
     # 2) RestCharField and child classes don't allow to pass empty string if required=True
     # 3) run_validators() method is not called if value is in empty_values, so min_length validation doesn't work
     #    for RestCharField and value=''
-    empty_values = []
+    empty_values = [None]
 
     def to_python(self, value):  # type: (Any) -> Optional[str]
         return None if value is None else super(EmptyStringFixMixing, self).to_python(value)

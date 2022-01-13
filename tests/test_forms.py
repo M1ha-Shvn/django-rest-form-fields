@@ -81,3 +81,40 @@ class SourceBaseModelFormTest(TestCase):
                         {'dest': 'init', 'model_field': 'm'})
         self._test_form(BaseModelForm, {'dest': RestCharField(source='src', required=False, initial='init')},
                         {'dest': 'test', 'model_field': 'm'})
+
+
+class RequiredBaseModelFormTest(TestCase):
+    def test_base_form(self):
+        class TestForm(BaseForm):
+            test = RestCharField(max_length=255, required=False)
+
+        f = TestForm({})
+        f.full_clean()
+        self.assertTrue(f.is_valid())
+        self.assertDictEqual({'test': None}, f.cleaned_data)
+
+    def test_model_form(self):
+        class TestForm(BaseModelForm):
+            class Meta:
+                model = ModelExample
+                fields = ('model_field',)
+
+            model_field = RestCharField(max_length=255, required=False)
+
+        f = TestForm({})
+        f.full_clean()
+        self.assertTrue(f.is_valid())
+        self.assertDictEqual({'model_field': None}, f.cleaned_data)
+
+    def test_model_form_initial(self):
+        class TestForm(BaseModelForm):
+            class Meta:
+                model = ModelExample
+                fields = ('model_field',)
+
+            model_field = RestCharField(max_length=255, required=False, initial='init')
+
+        f = TestForm({})
+        f.full_clean()
+        self.assertTrue(f.is_valid())
+        self.assertDictEqual({'model_field': 'init'}, f.cleaned_data)
