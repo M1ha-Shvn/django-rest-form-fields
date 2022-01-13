@@ -33,8 +33,7 @@ WORKDIR /app/src
 # Install dependencies
 # set -eu "breaks" pipeline on first error
 COPY ./requirements-test.txt /app/requirements-test.txt
-RUN --mount=type=cache,target=/root/.cache/pip \
-  set -eu && \
+RUN set -eu && \
   python3 -m pip install --upgrade pip setuptools wheel  && \
   python3 -m pip install --upgrade --requirement /app/requirements-test.txt
 
