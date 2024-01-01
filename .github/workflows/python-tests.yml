@@ -24,6 +24,12 @@ jobs:
           - python-version: "3.7"
             django-version: "5.0"
 
+          # Django 5.0+ doesn't support python 3.8, 3.9
+          - python-version: "3.8"
+            django-version: "5.0"
+          - python-version: "3.9"
+            django-version: "5.0"
+
     steps:
     - uses: actions/checkout@v2
 
