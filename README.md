@@ -4,13 +4,15 @@
 Extended form fields to validate REST-request data via django.forms.
 
 ## Requirements
-* Python 3.6+  
+* Python 3.7+  
   Other versions may also work but not tested automatically
 * Django 2.2+  
   Other versions may also work but not tested automatically
-* jsonschema
-* pytz
-* typing; python_version < '3.5'
+* typing  
+* jsonschema  
+  Optional. Required for validating json schema in `JsonField` and its child classes
+* pytz  
+  Optional. Required for `TimezoneField`
 
 ## Installation
 Install via pip:  
