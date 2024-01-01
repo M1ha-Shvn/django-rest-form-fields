@@ -6,9 +6,7 @@ import datetime
 import json
 from typing import Any, Optional, Union
 
-import jsonschema
 import os
-import pytz
 import re
 from django import forms
 from django.core.exceptions import ValidationError
@@ -219,10 +217,10 @@ class TimestampField(RestFloatField):
         value = super(TimestampField, self).clean(value)
         if value == 0:
             # Fix python 3.6 issue with Invalid argument value=0
-            return datetime.datetime(1970, 1, 1, tzinfo=pytz.utc)
+            return datetime.datetime(1970, 1, 1, tzinfo=datetime.UTC)
         elif value is not None:
             dt = datetime.datetime.utcfromtimestamp(value)
-            return make_aware(dt, pytz.utc)
+            return make_aware(dt, datetime.UTC)
         else:
             return value
 
@@ -261,7 +259,7 @@ class DateTimeField(RestCharField):
             except (ValueError, TypeError):
                 raise ValidationError("Invalid value format (%s)" % self.mask)
 
-            return make_aware(dt, pytz.utc)
+            return make_aware(dt, datetime.UTC)
         else:
             return value
 
@@ -316,6 +314,11 @@ class TimezoneField(RestCharField):
 
     def validate(self, value):  # type: (Optional[str]) -> None
         super(TimezoneField, self).validate(value)
+        try:
+            import pytz
+        except ImportError as ex:
+            raise ImportError('pytz is required  for TimezoneField') from ex
+
         if value and value not in pytz.all_timezones:
             raise ValidationError("Invalid timezone '{0}'".format(value))
 
@@ -439,7 +442,10 @@ class JsonField(RestCharField):
         super(JsonField, self).validate(value)
         if self._json_schema and value is not None:
             try:
+                import jsonschema
                 jsonschema.validate(value, self._json_schema)
+            except ImportError as ex:
+                raise ImportError("jsonschema library is not required for this operation") from ex
             except jsonschema.exceptions.ValidationError as ex:
                 raise ValidationError(ex.message)
 

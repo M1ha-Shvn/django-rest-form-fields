@@ -10,7 +10,6 @@ import uuid
 from django.core.exceptions import ValidationError
 from django.core.validators import BaseValidator
 from django.utils import timezone
-from django.utils.timezone import utc
 from io import BytesIO
 from unittest import TestCase
 
@@ -381,7 +380,7 @@ class TimestampFieldTest(TestCase):
         self.assertEqual(now, res)
 
     def test_timezones(self):
-        dt = datetime.datetime(2017, 1, 1, 0, 0, 0, tzinfo=utc)
+        dt = datetime.datetime(2017, 1, 1, 0, 0, 0, tzinfo=datetime.UTC)
         ts = to_timestamp(dt)
         f = TimestampField()
         res = f.clean(ts)
@@ -391,7 +390,7 @@ class TimestampFieldTest(TestCase):
         ts = to_timestamp(dt)
         f = TimestampField()
         res = f.clean(ts)
-        dt = dt.replace(tzinfo=utc)
+        dt = dt.replace(tzinfo=datetime.UTC)
         self.assertEqual(dt, res)
 
     def test_bounds(self):
