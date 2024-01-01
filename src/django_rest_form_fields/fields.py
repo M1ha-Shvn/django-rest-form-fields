@@ -2,8 +2,8 @@
 This file contains a number of custom fields to validate data with django forms
 """
 
-import datetime
 import json
+from datetime import timezone, datetime, date
 from typing import Any, Optional, Union
 
 import os
@@ -11,8 +11,7 @@ import re
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
-from django.utils import timezone
-from django.utils.timezone import make_aware
+from django.utils.timezone import make_aware, now
 
 from .compatibility import to_timestamp, PatternType, string_types
 from .exceptions import FileSizeError, FileTypeError
@@ -188,7 +187,7 @@ class IdField(PositiveIntegerField):
 
 class TimestampField(RestFloatField):
     """
-    Form field, containing timestamp integer. Converts given value to datetime.datetime object
+    Form field, containing timestamp integer. Converts given value to datetime object
     """
 
     def __init__(self, *args, **kwargs):
@@ -205,43 +204,43 @@ class TimestampField(RestFloatField):
 
         # Converts initial to timestamp, if it is given as datetime
         if 'initial' in kwargs:
-            assert isinstance(kwargs['initial'], (datetime.datetime, int, float)), \
-                "initial must be int, float or datetime.datetime instance"
+            assert isinstance(kwargs['initial'], (datetime, int, float)), \
+                "initial must be int, float or datetime instance"
             dt = kwargs['initial']
-            if isinstance(dt, datetime.datetime):
+            if isinstance(dt, datetime):
                 kwargs['initial'] = to_timestamp(dt)
 
         super(TimestampField, self).__init__(*args, min_value=0, max_value=2147483647, **kwargs)
 
-    def clean(self, value):  # type: (Any) -> Optional[datetime.datetime]
+    def clean(self, value):  # type: (Any) -> Optional[datetime]
         value = super(TimestampField, self).clean(value)
         if value == 0:
             # Fix python 3.6 issue with Invalid argument value=0
-            return datetime.datetime(1970, 1, 1, tzinfo=datetime.UTC)
+            return datetime(1970, 1, 1, tzinfo=timezone.utc)
         elif value is not None:
-            dt = datetime.datetime.utcfromtimestamp(value)
-            return make_aware(dt, datetime.UTC)
+            dt = datetime.utcfromtimestamp(value)
+            return make_aware(dt, timezone.utc)
         else:
             return value
 
     def validate(self, value):  # type: (Optional[int]) -> None
         super(TimestampField, self).validate(value)
         if value is not None:
-            if not self._in_future and value > to_timestamp(timezone.now()):
+            if not self._in_future and value > to_timestamp(now()):
                 raise ValidationError("You can't search time in future")
 
 
 class DateTimeField(RestCharField):
     """
-    Parses given string as datetime by given mask with datetime.datetime.strptime() method
+    Parses given string as datetime by given mask with datetime.strptime() method
     """
-    base_type = datetime.datetime
+    base_type = datetime
 
     def __init__(self, *args, **kwargs):
         """
         Initializes field
         :param args: Positional arguments
-        :param mask: Mask to parse datetime string with datetime.datetime.strptime() method
+        :param mask: Mask to parse datetime string with datetime.strptime() method
         :param kwargs: Named arguments
         """
         mask = kwargs.pop("mask", "%Y-%m-%dT%H:%M:%S")
@@ -251,31 +250,31 @@ class DateTimeField(RestCharField):
 
         self.mask = mask
 
-    def clean(self, value):  # type: (Any) -> datetime.datetime
+    def clean(self, value):  # type: (Any) -> datetime
         value = super(DateTimeField, self).clean(value)
         if value is not None and not isinstance(value, self.base_type):
             try:
-                dt = datetime.datetime.strptime(value, self.mask)
+                dt = datetime.strptime(value, self.mask)
             except (ValueError, TypeError):
                 raise ValidationError("Invalid value format (%s)" % self.mask)
 
-            return make_aware(dt, datetime.UTC)
+            return make_aware(dt, timezone.utc)
         else:
             return value
 
 
 class DateField(DateTimeField):
     """
-    Parses month with datetime.datetime.strptime() method. Default format is %Y-%m.
+    Parses month with datetime.strptime() method. Default format is %Y-%m.
     Returns datetime.date with first day of month.
     """
-    base_type = datetime.date
+    base_type = date
 
     def __init__(self, *args, **kwargs):
         """
         Initializes field
         :param args: Positional arguments
-        :param mask: Mask to parse month string with datetime.datetime.strptime() method
+        :param mask: Mask to parse month string with datetime.strptime() method
         :param kwargs: Named arguments
         """
         mask = kwargs.pop("mask", "%Y-%m-%d")
@@ -283,12 +282,12 @@ class DateField(DateTimeField):
 
     def clean(self, value):  # type (Any) -> datetime.date
         value = super(DateField, self).clean(value)
-        return value.date() if isinstance(value, datetime.datetime) else value
+        return value.date() if isinstance(value, datetime) else value
 
 
 class MonthField(DateTimeField):
     """
-    Parses month with datetime.datetime.strptime() method. Default format is %Y-%m.
+    Parses month with datetime.strptime() method. Default format is %Y-%m.
     Returns datetime.date with first day of month.
     """
 
@@ -296,15 +295,15 @@ class MonthField(DateTimeField):
         """
         Initializes field
         :param args: Positional arguments
-        :param mask: Mask to parse month string with datetime.datetime.strptime() method
+        :param mask: Mask to parse month string with datetime.strptime() method
         :param kwargs: Named arguments
         """
         mask = kwargs.pop("mask", "%Y-%m")
         super(MonthField, self).__init__(*args, mask=mask, **kwargs)
 
-    def clean(self, value):  # type (Any) -> datetime.date
+    def clean(self, value):  # type (Any) -> date
         value = super(MonthField, self).clean(value)
-        return value.date() if isinstance(value, datetime.datetime) else value
+        return value.date() if isinstance(value, datetime) else value
 
 
 class TimezoneField(RestCharField):
@@ -443,9 +442,11 @@ class JsonField(RestCharField):
         if self._json_schema and value is not None:
             try:
                 import jsonschema
-                jsonschema.validate(value, self._json_schema)
             except ImportError as ex:
                 raise ImportError("jsonschema library is not required for this operation") from ex
+
+            try:
+                jsonschema.validate(value, self._json_schema)
             except jsonschema.exceptions.ValidationError as ex:
                 raise ValidationError(ex.message)
 
