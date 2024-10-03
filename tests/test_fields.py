@@ -13,13 +13,14 @@ from unittest import TestCase
 
 from django.core.exceptions import ValidationError
 from django.core.validators import BaseValidator
+from django.test import override_settings
 from django.utils.timezone import now
 
 from django_rest_form_fields.compatibility import to_timestamp
 from django_rest_form_fields.fields import RestBooleanField, LowerCaseEmailField, TimestampField, DateUnitField, \
     ColorField, IdArrayField, IdSetField, TruncatedCharField, JsonField, ArrayField, UrlField, RestCharField, \
     RestChoiceField, RestIntegerField, RegexField, UUIDField, DateTimeField, MonthField, FileField, RestFloatField, \
-    DateField
+    DateField, IdField
 
 
 class TestErrorValidator(BaseValidator):
@@ -177,6 +178,85 @@ class RestIntegerFieldTest(TestCase):
         f = RestIntegerField(validators=[TestErrorValidator(0)])
         with self.assertRaises(ValidationError):
             f.clean('')
+
+
+class IdFieldTest(TestCase):
+    def test_string(self):
+        f = IdField()
+        self.assertEqual(1, f.clean('1'))
+
+    def test_integer(self):
+        f = IdField()
+        self.assertEqual(2, f.clean(2))
+
+    def test_zero_invalid(self):
+        f = IdField()
+
+        with self.assertRaises(ValidationError):
+            f.clean("0")
+
+    def test_negative(self):
+        f = IdField()
+
+        with self.assertRaises(ValidationError):
+            f.clean("-1")
+
+    def test_invalid_format(self):
+        f = IdField()
+
+        with self.assertRaises(ValidationError):
+            f.clean("1.123")
+
+    def test_with_zero(self):
+        f = IdField(with_zero=True)
+        self.assertEqual(0, f.clean('0'))
+
+    def test_settings_max_value_not_set(self):
+        f = IdField()
+        self.assertEqual(2 ** 64 + 1, f.clean(2 ** 64 + 1))
+
+    @override_settings(ID_FIELD_MAX_VALUE=2**64)
+    def test_settings_max_value(self):
+        f = IdField()
+        with self.subTest("Max value"):
+            self.assertEqual(2**64, f.clean(2**64))
+
+        with self.subTest("Too big value"):
+            with self.assertRaises(ValidationError):
+                f.clean(2 ** 64 + 1)
+
+    def test_max_value(self):
+        f = IdField(max_value=100)
+        with self.subTest("Max value"):
+            self.assertEqual(100, f.clean(100))
+
+        with self.subTest("Too big value"):
+            with self.assertRaises(ValidationError):
+                f.clean(101)
+
+    def test_min_value(self):
+        f = IdField(min_value=10)
+        with self.subTest("Min value"):
+            self.assertEqual(10, f.clean(10))
+
+        with self.subTest("Too small value"):
+            with self.assertRaises(ValidationError):
+                f.clean(9)
+
+    def test_required(self):
+        with self.subTest("required=False"):
+            f = IdField(required=False)
+            self.assertIsNone(f.clean(None))
+
+        with self.subTest("required=True"):
+            f = IdField()
+
+            with self.assertRaises(ValidationError):
+                f.clean(None)
+
+    def test_initial(self):
+        f = IdArrayField(required=False, initial=1)
+        self.assertEqual(1, f.clean(None))
 
 
 class RestFloatFieldTest(TestCase):

@@ -99,11 +99,17 @@ Parameters:
 Resulting value: `Optional[int/float]`
 
 ### PositiveIntegerField(*args, with_zero: bool = False, source: Optional[str] = None, **kwargs)
-### IdField(*args, with_zero: bool = False, source: Optional[str] = None, **kwargs)
-Child of RestIntegerField, validating value as positive integer
+Child of RestIntegerField, validating value as positive integer.  
+
 Parameters:
 * with_zero: bool - if False, 0 will cause validation error  
 * source: Optional[str] - name of attribute to get data from. Defaults to form attribute name.
+
+Resulting value: `Optional[int]`
+
+### IdField(*args, with_zero: bool = False, source: Optional[str] = None, **kwargs)
+Child of PositiveIntegerField, validating integer id value.
+Upper value can be limited globally with `ID_FIELD_MAX_VALUE` in `django.conf.settings`.  
 
 Resulting value: `Optional[int]`
 

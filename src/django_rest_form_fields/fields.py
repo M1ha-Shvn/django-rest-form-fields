@@ -181,7 +181,12 @@ class IdField(PositiveIntegerField):
     """
 
     def __init__(self, *args, **kwargs):
+        from django.conf import settings
+        max_value = getattr(settings, "ID_FIELD_MAX_VALUE", None)
         kwargs['with_zero'] = kwargs.get('with_zero', False)
+        if max_value is not None:
+            kwargs['max_value'] = kwargs.get('max_value', max_value)
+
         super(IdField, self).__init__(*args, **kwargs)
 
 
