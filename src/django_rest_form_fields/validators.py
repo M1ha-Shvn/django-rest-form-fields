@@ -1,11 +1,17 @@
 import re
-from django.core.validators import DomainNameValidator, URLValidator
+from django.core.validators import URLValidator
+
+try:
+    # This attribute has been moved from URLValidator to DomainNameValidator in django 5.2
+    from django.core.validators import DomainNameValidator
+
+    ul = getattr(DomainNameValidator, "ul", getattr(URLValidator, "ul", None))
+except ImportError:
+    ul = URLValidator.ul
+
 
 
 class URLValidatorWithUnderscoreDomain(URLValidator):
-    # This attributes has been moved from URLValidator to DomainNameValidator in django 5.2
-    ul = getattr(DomainNameValidator, "ul", getattr(URLValidator, "ul", None))
-
     hostname_re = r'[a-z' + ul + r'0-9](?:[a-z' + ul + r'0-9-_]{0,61}[a-z' + ul + r'0-9])?'
     host_re = '(' + hostname_re + URLValidator.domain_re + URLValidator.tld_re + '|localhost)'
 
