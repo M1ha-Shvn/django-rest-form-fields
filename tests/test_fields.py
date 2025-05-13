@@ -36,7 +36,7 @@ class TestErrorValidator(BaseValidator):
 class LowerCaseEmailFieldTest(TestCase):
     def test_to_lower(self):
         f = LowerCaseEmailField()
-        self.assertEqual(f.clean('TeSt@mail.ru1'), 'test@mail.ru1')
+        self.assertEqual(f.clean('TeSt@mail.ru'), 'test@mail.ru')
 
     def test_required(self):
         f = LowerCaseEmailField(required=False)

@@ -11,6 +11,7 @@ import re
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
+from django.forms import NullBooleanSelect, Textarea
 from django.utils.timezone import make_aware, now
 
 from .compatibility import to_timestamp, PatternType, string_types
@@ -346,6 +347,7 @@ class RestBooleanField(RestCharField):
     + 'false', '0', '' (ignoring case) as False
     + Everything else is parsed with standard bool function
     """
+    widget = NullBooleanSelect
 
     def to_python(self, value):  # type: (Any) -> Optional[bool]
         """Returns a Python boolean object."""
@@ -419,6 +421,7 @@ class JsonField(RestCharField):
     """
     This field Json serialized string with jsonschema
     """
+    widget = Textarea
 
     def __init__(self, *args, **kwargs):
         """
