@@ -13,7 +13,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='django-rest-form-fields',
-    version='1.4.1',
+    version='1.4.2',
     packages=['django_rest_form_fields'],
     package_dir={'': 'src'},
     url='https://github.com/M1hacka/django-rest-form-fields',

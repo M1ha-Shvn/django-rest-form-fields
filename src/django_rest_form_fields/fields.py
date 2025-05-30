@@ -338,6 +338,26 @@ class DateUnitField(RestChoiceField):
         super(DateUnitField, self).__init__(*args, choices=self.UNIT_CHOICES, **kwargs)
 
 
+class NullBooleanSelectWidget(NullBooleanSelect):
+    """
+    bf.data here calls widget.value_from_datadict(self.data, self.files, html_name)
+    It does some strange tricky thing with value, converting it to boolean with rules other than we have
+    That's why I take original value here
+    """
+    def value_from_datadict(self, data, files, name):
+        value = data.get(name)
+        if value is None:
+            return None
+
+        elif isinstance(value, string_types) and value.lower() in ('false', '0', ''):
+            value = False
+
+        else:
+            value = bool(value)
+
+        return value
+
+
 class RestBooleanField(RestCharField):
     """
     Standard BooleanField is based on /django/forms/widgets.py CheckboxInput.value_from_datadict(value)
@@ -347,7 +367,7 @@ class RestBooleanField(RestCharField):
     + 'false', '0', '' (ignoring case) as False
     + Everything else is parsed with standard bool function
     """
-    widget = NullBooleanSelect
+    widget = NullBooleanSelectWidget
 
     def to_python(self, value):  # type: (Any) -> Optional[bool]
         """Returns a Python boolean object."""

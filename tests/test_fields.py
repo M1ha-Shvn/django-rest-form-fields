@@ -13,6 +13,7 @@ from unittest import TestCase
 
 from django.core.exceptions import ValidationError
 from django.core.validators import BaseValidator
+from django.forms import Form
 from django.test import override_settings
 from django.utils.timezone import now
 
@@ -66,6 +67,16 @@ class RestBooleanFieldTest(TestCase):
     def test_1(self):
         f = RestBooleanField()
         self.assertEqual(True, f.clean('1'))
+
+    def test_1_in_form(self):
+        # Here django NullBooleanSelect.value_from_datadict is called, causing "1" to be evaluated as False...
+        class TestForm(Form):
+            b = RestBooleanField()
+
+        f = TestForm({"b": "1"})
+
+        self.assertTrue(f.is_valid())
+        self.assertEqual({"b": True}, f.cleaned_data)
 
     def test_false(self):
         f = RestBooleanField()
