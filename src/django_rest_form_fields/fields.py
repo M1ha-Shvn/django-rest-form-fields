@@ -349,6 +349,13 @@ class RestBooleanField(RestCharField):
     """
     widget = NullBooleanSelect
 
+    def _clean_bound_field(self, bf):
+        # bf.data here calls widget.value_from_datadict(self.data, self.files, html_name)
+        # It does some strange tricky thing with value, converting it to boolean with rules other than we have
+        # That's why I take original value here
+        value = bf.initial if self.disabled else bf.form.data.get(bf.html_name)
+        return self.clean(value)
+
     def to_python(self, value):  # type: (Any) -> Optional[bool]
         """Returns a Python boolean object."""
         if value is None:
